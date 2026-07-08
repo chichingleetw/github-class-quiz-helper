@@ -3,6 +3,27 @@
 
   const allowChangeAnswer = false;
   const optionKeys = ["A", "B", "C", "D", "E", "F"];
+  const columnAliases = {
+    questionId: ["題目ID", "題目編號", "questionId"],
+    questionText: ["題目", "題目文字", "questionText"],
+    optionA: ["選項A", "optionA"],
+    optionB: ["選項B", "optionB"],
+    optionC: ["選項C", "optionC"],
+    optionD: ["選項D", "optionD"],
+    optionE: ["選項E", "optionE"],
+    optionF: ["選項F", "optionF"],
+    active: ["開放作答", "active"],
+    answerRevealed: ["公布答案", "答案公布", "answerRevealed"],
+    correctAnswer: ["正確答案", "correctAnswer"]
+  };
+  const columnLabels = {
+    questionId: "題目ID",
+    questionText: "題目",
+    optionA: "選項A",
+    optionB: "選項B",
+    active: "開放作答",
+    answerRevealed: "公布答案"
+  };
   const requiredColumns = [
     "questionId",
     "questionText",
@@ -174,14 +195,16 @@
       throw new Error("CSV 沒有資料。");
     }
 
-    const headers = nonEmptyRows[0].map((header, index) => {
+    const rawHeaders = nonEmptyRows[0].map((header, index) => {
       const trimmed = header.trim();
       return index === 0 ? trimmed.replace(/^\uFEFF/, "") : trimmed;
     });
+    const headers = rawHeaders.map(normalizeColumnHeader);
     const missingColumns = requiredColumns.filter((column) => !headers.includes(column));
     if (missingColumns.length > 0) {
-      const detectedHeaders = headers.filter(Boolean).slice(0, 6).join(", ") || "沒有偵測到欄位";
-      throw new Error(`CSV 欄位格式錯誤，缺少：${missingColumns.join(", ")}。目前偵測到的第一列是：${detectedHeaders}`);
+      const missingLabels = missingColumns.map((column) => columnLabels[column] || column);
+      const detectedHeaders = rawHeaders.filter(Boolean).slice(0, 6).join(", ") || "沒有偵測到欄位";
+      throw new Error(`CSV 欄位格式錯誤，缺少：${missingLabels.join(", ")}。目前偵測到的第一列是：${detectedHeaders}`);
     }
 
     return nonEmptyRows.slice(1).map((cells) => {
@@ -190,6 +213,14 @@
         return record;
       }, {});
     });
+  }
+
+  function normalizeColumnHeader(header) {
+    const normalized = String(header || "").trim();
+    const canonicalColumn = Object.keys(columnAliases).find((column) => {
+      return columnAliases[column].includes(normalized);
+    });
+    return canonicalColumn || normalized;
   }
 
   function normalizeQuestions(rows) {
@@ -298,7 +329,7 @@
   function renderQuizSummary() {
     const invalidRevealedQuestion = activeQuestions.find((question) => question.answerRevealed && !question.correctAnswer);
     if (invalidRevealedQuestion) {
-      setStatus(`題目 ${invalidRevealedQuestion.questionId} 已公布答案，但 correctAnswer 是空白。請老師確認 Google Sheet。`, "error");
+      setStatus(`題目 ${invalidRevealedQuestion.questionId} 已公布答案，但「正確答案」是空白。請老師確認 Google Sheet。`, "error");
       return;
     }
 
@@ -359,11 +390,11 @@
     const correctAnswer = question.correctAnswer;
 
     if (question.options.length === 0) {
-      return "active 題目沒有可顯示的選項。";
+      return "開放作答的題目沒有可顯示的選項。";
     }
 
     if (question.answerRevealed && !correctAnswer) {
-      return "answerRevealed 為 T，但 correctAnswer 是空白。請老師確認 Google Sheet。";
+      return "「公布答案」為 T，但「正確答案」是空白。請老師確認 Google Sheet。";
     }
 
     if (!savedAnswer) {
