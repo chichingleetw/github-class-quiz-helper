@@ -23,7 +23,7 @@
 - `sample.csv`：答案尚未公布。
 - `sample-revealed.csv`：答案已公布，正確答案為 B。
 
-## Google Sheet 欄位格式
+## Google Sheet 欄位格式 (複製到您的Google sheet，權限設定成公開可讀)
 
 第一列必須是欄位名稱：
 
