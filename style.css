@@ -226,6 +226,10 @@ th {
   background: var(--accent);
 }
 
+.submit-all-button {
+  margin-top: 1rem;
+}
+
 .ghost-button {
   min-height: 42px;
   border: 1px solid var(--line);

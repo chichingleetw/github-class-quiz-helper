@@ -43,6 +43,7 @@
     questionsList: document.getElementById("questionsList"),
     noticeBox: document.getElementById("noticeBox"),
     reloadButton: document.getElementById("reloadButton"),
+    submitAnswersButton: document.getElementById("submitAnswersButton"),
     clearAnswersButton: document.getElementById("clearAnswersButton")
   };
 
@@ -79,19 +80,15 @@
 
     els.questionsList.addEventListener("click", function (event) {
       const optionButton = event.target.closest("[data-option-key]");
-      const submitButton = event.target.closest("[data-submit-question-id]");
 
       if (optionButton) {
         const questionId = optionButton.dataset.questionId;
         selectedAnswers[questionId] = optionButton.dataset.optionKey;
         renderCurrentState();
-        return;
-      }
-
-      if (submitButton) {
-        submitAnswer(submitButton.dataset.submitQuestionId);
       }
     });
+
+    els.submitAnswersButton.addEventListener("click", submitSelectedAnswers);
 
     els.clearAnswersButton.addEventListener("click", function () {
       const confirmed = window.confirm("確定要清除這個課程存在本機的作答紀錄嗎？");
@@ -121,6 +118,7 @@
         selectedAnswers = {};
         els.quizTitle.textContent = "目前尚未開放題目";
         els.questionsList.innerHTML = "";
+        updateSubmitButton();
         setStatus("目前尚未開放題目，請等待老師。", "warning");
         return;
       }
@@ -288,11 +286,7 @@
     return match ? match[1] : "";
   }
 
-  function submitAnswer(questionId) {
-    const question = activeQuestions.find((item) => item.questionId === questionId);
-    const selectedAnswer = selectedAnswers[questionId];
-    if (!question || !selectedAnswer) return;
-
+  function submitSelectedAnswers() {
     const profile = getProfile();
     if (!profile.studentName) {
       setProfileMessage("請先輸入姓名。");
@@ -300,16 +294,20 @@
       return;
     }
 
-    const existingAnswer = getSavedAnswer(questionId);
-    if (existingAnswer && !allowChangeAnswer) {
+    const unansweredQuestions = getUnansweredQuestions();
+    const allUnansweredSelected = unansweredQuestions.every((question) => selectedAnswers[question.questionId]);
+    if (unansweredQuestions.length === 0 || !allUnansweredSelected) {
       renderCurrentState();
       return;
     }
 
-    answersStore.answers[questionId] = {
-      answer: selectedAnswer,
-      answeredAt: new Date().toISOString()
-    };
+    const answeredAt = new Date().toISOString();
+    unansweredQuestions.forEach((question) => {
+      answersStore.answers[question.questionId] = {
+        answer: selectedAnswers[question.questionId],
+        answeredAt
+      };
+    });
     saveAnswers();
     renderCurrentState();
   }
@@ -324,6 +322,7 @@
     activeQuestions.forEach((question, index) => {
       els.questionsList.appendChild(renderQuestionCard(question, index));
     });
+    updateSubmitButton();
   }
 
   function renderQuizSummary() {
@@ -336,7 +335,13 @@
     const allAnswersRevealed = activeQuestions.every((question) => question.answerRevealed && question.correctAnswer);
     if (!allAnswersRevealed) {
       const answeredCount = activeQuestions.filter((question) => getSavedAnswer(question.questionId)).length;
-      setStatus(`請選擇答案後逐題送出。\n已送出：${answeredCount} / ${activeQuestions.length} 題`, "info");
+      const selectedCount = getUnansweredQuestions().filter((question) => selectedAnswers[question.questionId]).length;
+      const remainingCount = getUnansweredQuestions().length;
+      if (remainingCount === 0) {
+        setStatus(`已全部送出。\n等待老師公布答案。\n已送出：${answeredCount} / ${activeQuestions.length} 題`, "info");
+        return;
+      }
+      setStatus(`請選擇答案後，按最下方「送出答案」。\n已送出：${answeredCount} / ${activeQuestions.length} 題\n尚未送出已選擇：${selectedCount} / ${remainingCount} 題`, "info");
       return;
     }
 
@@ -370,14 +375,10 @@
       })
       .join("");
 
-    const submitDisabled = locked || !selectedAnswer || question.options.length === 0 ? " disabled" : "";
-    const submitText = locked ? "已送出答案" : "送出答案";
-
     card.innerHTML = `
       <p class="eyebrow">第 ${index + 1} 題：${escapeHtml(question.questionId)}</p>
       <div class="question-text">${escapeHtml(question.questionText)}</div>
       <div class="options-grid">${optionsHtml}</div>
-      <button class="primary-action" type="button" data-submit-question-id="${escapeHtml(question.questionId)}"${submitDisabled}>${submitText}</button>
       <div class="status-box ${getStatusClass(question)}">${escapeHtml(getQuestionStatus(question))}</div>
     `;
 
@@ -401,7 +402,7 @@
       if (question.answerRevealed) {
         return `本題答案已公布。\n你尚未作答。\n正確答案：${correctAnswer}`;
       }
-      return selectedAnswer ? `已選擇：${selectedAnswer}\n按下送出後才會儲存在本機。` : "請選擇一個答案。";
+      return selectedAnswer ? `已選擇：${selectedAnswer}\n按最下方「送出答案」後才會儲存在本機。` : "請選擇一個答案。";
     }
 
     if (!question.answerRevealed) {
@@ -427,6 +428,7 @@
     selectedAnswers = {};
     els.quizTitle.textContent = message;
     els.questionsList.innerHTML = "";
+    updateSubmitButton();
     hideNotice();
     setStatus("題目讀取中。", "info");
   }
@@ -434,7 +436,29 @@
   function showError(message) {
     els.quizTitle.textContent = "無法載入題目";
     els.questionsList.innerHTML = "";
+    updateSubmitButton();
     setStatus(message, "error");
+  }
+
+  function getUnansweredQuestions() {
+    return activeQuestions.filter((question) => {
+      const savedAnswer = getSavedAnswer(question.questionId);
+      return question.options.length > 0 && (!savedAnswer || allowChangeAnswer);
+    });
+  }
+
+  function updateSubmitButton() {
+    if (activeQuestions.length === 0) {
+      els.submitAnswersButton.disabled = true;
+      els.submitAnswersButton.textContent = "送出答案";
+      return;
+    }
+
+    const unansweredQuestions = getUnansweredQuestions();
+    const allUnansweredSelected = unansweredQuestions.every((question) => selectedAnswers[question.questionId]);
+    const shouldEnable = unansweredQuestions.length > 0 && allUnansweredSelected;
+    els.submitAnswersButton.disabled = !shouldEnable;
+    els.submitAnswersButton.textContent = unansweredQuestions.length === 0 ? "已送出答案" : "送出答案";
   }
 
   function showNotice(message) {
