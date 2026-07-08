@@ -29,7 +29,7 @@
   };
 
   const params = new URLSearchParams(window.location.search);
-  const sheetUrl = params.get("sheetUrl") || "";
+  const sheetUrl = normalizeSheetUrl(params.get("sheetUrl") || "");
   const classId = sanitizeKey(params.get("classId") || "default");
   const answersKey = `classQuizAnswers_${classId}`;
 
@@ -135,7 +135,11 @@
     if (!response.ok) {
       throw new Error("無法讀取 Google Sheet CSV，請確認 CSV 連結已發布到網路。");
     }
-    return response.text();
+    const text = await response.text();
+    if (/^\s*<!doctype html/i.test(text) || /^\s*<html[\s>]/i.test(text)) {
+      throw new Error("讀到的是 Google Sheet 網頁，不是 CSV。請在老師工具頁貼上 Google Sheet 網址後重新產生學生網址，或使用「發布到網路」的 CSV 連結。");
+    }
+    return text;
   }
 
   function parseCsv(text) {
@@ -183,10 +187,14 @@
       throw new Error("CSV 沒有資料。");
     }
 
-    const headers = nonEmptyRows[0].map((header) => header.trim());
+    const headers = nonEmptyRows[0].map((header, index) => {
+      const trimmed = header.trim();
+      return index === 0 ? trimmed.replace(/^\uFEFF/, "") : trimmed;
+    });
     const missingColumns = requiredColumns.filter((column) => !headers.includes(column));
     if (missingColumns.length > 0) {
-      throw new Error(`CSV 欄位格式錯誤，缺少：${missingColumns.join(", ")}`);
+      const detectedHeaders = headers.filter(Boolean).slice(0, 6).join(", ") || "沒有偵測到欄位";
+      throw new Error(`CSV 欄位格式錯誤，缺少：${missingColumns.join(", ")}。目前偵測到的第一列是：${detectedHeaders}`);
     }
 
     return nonEmptyRows.slice(1).map((cells) => {
@@ -220,6 +228,46 @@
   function parseBoolean(value) {
     const normalized = String(value || "").trim().toLowerCase();
     return ["true", "1", "是", "y", "yes"].includes(normalized);
+  }
+
+  function normalizeSheetUrl(value) {
+    const rawUrl = String(value || "").trim();
+    if (!rawUrl) return "";
+
+    try {
+      const url = new URL(rawUrl);
+      if (url.hostname !== "docs.google.com") return rawUrl;
+      if (!url.pathname.includes("/spreadsheets/d/")) return rawUrl;
+      if (url.searchParams.get("output") === "csv") return rawUrl;
+
+      const gid = url.searchParams.get("gid") || extractGidFromHash(url.hash);
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      const documentId = pathParts[pathParts.indexOf("d") + 1];
+      if (!documentId) return rawUrl;
+
+      if (url.pathname.includes("/pubhtml")) {
+        url.pathname = url.pathname.replace("/pubhtml", "/pub");
+        url.search = "";
+        url.hash = "";
+        url.searchParams.set("output", "csv");
+        if (gid) url.searchParams.set("gid", gid);
+        return url.toString();
+      }
+
+      url.pathname = `/spreadsheets/d/${documentId}/export`;
+      url.search = "";
+      url.hash = "";
+      url.searchParams.set("format", "csv");
+      if (gid) url.searchParams.set("gid", gid);
+      return url.toString();
+    } catch {
+      return rawUrl;
+    }
+  }
+
+  function extractGidFromHash(hash) {
+    const match = String(hash || "").match(/gid=(\d+)/);
+    return match ? match[1] : "";
   }
 
   function renderCurrentState() {
@@ -394,6 +442,7 @@
   window.classQuizUtils = {
     parseCsv,
     parseBoolean,
+    normalizeSheetUrl,
     normalizeQuestions
   };
 })();

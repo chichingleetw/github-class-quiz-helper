@@ -13,7 +13,7 @@
 ## 快速開始
 
 1. 開啟 `teacher.html`。
-2. 貼上 Google Sheet 發布到網路後的 CSV URL。
+2. 貼上 Google Sheet 網址。可以貼一般編輯/分享網址，也可以貼發布到網路後的 CSV URL。
 3. 可選擇填入課程代號，例如 `bio101`。
 4. 產生學生網址與 QR code。
 5. 學生用手機進入學生網址，在 `index.html` 作答。
@@ -63,6 +63,8 @@ Q001,下列何者是粒線體主要功能？,光合作用,能量產生,儲存膽
 3. Source 選擇 main branch。
 4. Folder 選擇 root。
 5. 發布完成後，用 GitHub Pages 網址開啟 `teacher.html` 產生學生網址。
+
+如果學生頁出現「讀到的是 Google Sheet 網頁，不是 CSV」，請確認 Google Sheet 已發布到網路，或至少已設定為知道連結者可檢視，然後回老師工具頁重新產生學生網址。
 
 ## 隱私說明
 
