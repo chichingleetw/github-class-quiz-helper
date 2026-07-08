@@ -287,12 +287,34 @@
     if (activeQuestions.length === 0) return;
 
     els.quizTitle.textContent = `已開放 ${activeQuestions.length} 題`;
-    setStatus("請選擇答案後逐題送出。", "info");
+    renderQuizSummary();
     els.questionsList.innerHTML = "";
 
     activeQuestions.forEach((question, index) => {
       els.questionsList.appendChild(renderQuestionCard(question, index));
     });
+  }
+
+  function renderQuizSummary() {
+    const invalidRevealedQuestion = activeQuestions.find((question) => question.answerRevealed && !question.correctAnswer);
+    if (invalidRevealedQuestion) {
+      setStatus(`題目 ${invalidRevealedQuestion.questionId} 已公布答案，但 correctAnswer 是空白。請老師確認 Google Sheet。`, "error");
+      return;
+    }
+
+    const allAnswersRevealed = activeQuestions.every((question) => question.answerRevealed && question.correctAnswer);
+    if (!allAnswersRevealed) {
+      const answeredCount = activeQuestions.filter((question) => getSavedAnswer(question.questionId)).length;
+      setStatus(`請選擇答案後逐題送出。\n已送出：${answeredCount} / ${activeQuestions.length} 題`, "info");
+      return;
+    }
+
+    const correctCount = activeQuestions.filter((question) => {
+      const savedAnswer = getSavedAnswer(question.questionId);
+      return savedAnswer && savedAnswer.answer === question.correctAnswer;
+    }).length;
+
+    setStatus(`答案已公布。\n答對：${correctCount} / ${activeQuestions.length} 題`, "success");
   }
 
   function renderQuestionCard(question, index) {
