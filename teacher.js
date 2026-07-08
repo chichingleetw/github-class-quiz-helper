@@ -10,8 +10,13 @@
   const copyStatus = document.getElementById("copyStatus");
   const copySheetExampleButton = document.getElementById("copySheetExampleButton");
   const copySheetExampleStatus = document.getElementById("copySheetExampleStatus");
-  const sheetExampleTable = document.getElementById("sheetExampleTable");
+  const sheetExampleCopyText = document.getElementById("sheetExampleCopyText");
   const qrCodeBox = document.getElementById("qrcode");
+  const sheetExampleRows = [
+    ["題目ID", "題目", "選項A", "選項B", "選項C", "選項D", "開放作答", "公布答案", "正確答案"],
+    ["Q001", "粒線體主要功能？", "製造能量", "儲存膽汁", "合成纖維素", "運輸氧氣", "T", "F", ""],
+    ["Q002", "蛋白質基本單位？", "葡萄糖", "胺基酸", "脂肪酸", "核苷酸", "T", "F", ""]
+  ];
 
   let qrCode = null;
 
@@ -49,11 +54,24 @@
     const exampleText = getSheetExampleText();
     if (!exampleText) return;
 
+    sheetExampleCopyText.value = exampleText;
+    sheetExampleCopyText.classList.add("hidden");
+
     try {
       await copyTextToClipboard(exampleText);
       copySheetExampleStatus.textContent = "已複製欄位名稱與範例題目，可直接貼到 Google Sheet。";
     } catch {
-      copySheetExampleStatus.textContent = "無法自動複製，請手動選取表格內容後複製。";
+      sheetExampleCopyText.classList.remove("hidden");
+      sheetExampleCopyText.focus();
+      sheetExampleCopyText.select();
+      try {
+        const copied = document.execCommand("copy");
+        copySheetExampleStatus.textContent = copied
+          ? "已複製欄位名稱與範例題目，可直接貼到 Google Sheet。"
+          : "瀏覽器阻擋自動複製，已選取下方內容，請按 Cmd/Ctrl + C 複製。";
+      } catch {
+        copySheetExampleStatus.textContent = "瀏覽器阻擋自動複製，已選取下方內容，請按 Cmd/Ctrl + C 複製。";
+      }
     }
   });
 
@@ -70,9 +88,14 @@
     const textarea = document.createElement("textarea");
     textarea.value = text;
     textarea.setAttribute("readonly", "");
-    textarea.className = "visually-hidden";
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    textarea.style.opacity = "0";
     document.body.appendChild(textarea);
+    textarea.focus();
     textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
 
     try {
       const copied = document.execCommand("copy");
@@ -83,15 +106,7 @@
   }
 
   function getSheetExampleText() {
-    if (!sheetExampleTable) return "";
-
-    const rows = Array.from(sheetExampleTable.querySelectorAll("tr"));
-    return rows
-      .map((row) => {
-        const cells = Array.from(row.querySelectorAll("th, td"));
-        return cells.map((cell) => cell.textContent.trim()).join("\t");
-      })
-      .join("\n");
+    return sheetExampleRows.map((row) => row.join("\t")).join("\n");
   }
 
   function buildStudentUrl(sheetUrl, classId) {
