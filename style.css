@@ -230,6 +230,16 @@ th {
   margin-top: 1rem;
 }
 
+.refresh-answer-area {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.refresh-answer-area p {
+  margin: 0;
+}
+
 .ghost-button {
   min-height: 42px;
   border: 1px solid var(--line);

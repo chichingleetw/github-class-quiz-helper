@@ -44,6 +44,7 @@
     noticeBox: document.getElementById("noticeBox"),
     reloadButton: document.getElementById("reloadButton"),
     submitAnswersButton: document.getElementById("submitAnswersButton"),
+    refreshPageButton: document.getElementById("refreshPageButton"),
     clearAnswersButton: document.getElementById("clearAnswersButton")
   };
 
@@ -89,6 +90,10 @@
     });
 
     els.submitAnswersButton.addEventListener("click", submitSelectedAnswers);
+
+    els.refreshPageButton.addEventListener("click", function () {
+      window.location.reload();
+    });
 
     els.clearAnswersButton.addEventListener("click", function () {
       const confirmed = window.confirm("確定要清除這個課程存在本機的作答紀錄嗎？");
