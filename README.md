@@ -34,18 +34,18 @@ questionId,questionText,optionA,optionB,optionC,optionD,optionE,optionF,active,a
 範例：
 
 ```csv
-Q001,下列何者是粒線體主要功能？,光合作用,能量產生,儲存膽汁,合成纖維素,,,TRUE,FALSE,
+Q001,下列何者是粒線體主要功能？,光合作用,能量產生,儲存膽汁,合成纖維素,,,T,F,
 ```
 
-`active` 和 `answerRevealed` 支援 `TRUE/FALSE`、`true/false`、`1/0`、`是/否`、`Y/N`、`yes/no`。
+`active` 和 `answerRevealed` 建議使用 `T/F`。系統也支援 `TRUE/FALSE`、`true/false`、`1/0`、`是/否`、`Y/N`、`yes/no`。
 
 ## 老師操作流程
 
 1. 在 Google Sheet 填入題目與選項。
-2. 將目前題目的 `active` 設為 `TRUE`，其他題目設為 `FALSE`。
-3. 學生作答期間，將 `answerRevealed` 設為 `FALSE`。
+2. 將要開放的題目 `active` 設為 `T`，可同時開放多題；不開放的題目設為 `F`。
+3. 學生作答期間，將 `answerRevealed` 設為 `F`。
 4. 若不想讓懂技術的學生提前看到答案，公布前請讓 `correctAnswer` 保持空白。
-5. 公布答案時，填入 `correctAnswer`，例如 `B`，並將 `answerRevealed` 改為 `TRUE`。
+5. 公布答案時，填入 `correctAnswer`，例如 `B`，並將 `answerRevealed` 改為 `T`。
 6. 請學生按「重新讀取題目」或重新整理頁面。
 
 ## 學生操作流程

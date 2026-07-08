@@ -166,6 +166,19 @@ th {
   color: var(--muted);
 }
 
+.question-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.questions-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
 .question-text {
   margin: 1rem 0;
   font-size: 1.35rem;

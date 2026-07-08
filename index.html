@@ -32,21 +32,17 @@
       <section class="panel quiz-panel" aria-live="polite">
         <div class="section-heading">
           <div>
-            <p class="eyebrow" id="questionLabel">目前題目</p>
-            <h2 id="questionTitle">讀取中...</h2>
+            <p class="eyebrow">目前題目</p>
+            <h2 id="quizTitle">讀取中...</h2>
           </div>
           <button class="ghost-button" id="reloadButton" type="button">重新讀取題目</button>
         </div>
 
         <div class="notice hidden" id="noticeBox"></div>
-        <div class="question-text" id="questionText"></div>
-        <div class="options-grid" id="optionsGrid"></div>
-
-        <button class="primary-action" id="submitAnswerButton" type="button" disabled>送出答案</button>
-
-        <div class="status-box" id="answerStatus">
+        <div class="status-box" id="quizStatus">
           請先確認姓名並等待題目載入。
         </div>
+        <div class="questions-list" id="questionsList"></div>
 
         <button class="danger-button" id="clearAnswersButton" type="button">清除本機作答紀錄</button>
       </section>
