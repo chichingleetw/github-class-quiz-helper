@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>課堂單選作答系統</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">GitHub Pages + Google Sheet</p>
+          <h1>課堂單選作答系統</h1>
+        </div>
+        <a class="text-link" href="teacher.html">老師工具</a>
+      </header>
+
+      <section class="panel profile-panel" aria-labelledby="profile-title">
+        <div class="section-heading">
+          <h2 id="profile-title">學生姓名</h2>
+          <button class="ghost-button" id="editNameButton" type="button">修改姓名</button>
+        </div>
+        <form id="profileForm" class="inline-form">
+          <label class="visually-hidden" for="studentNameInput">姓名</label>
+          <input id="studentNameInput" name="studentName" type="text" autocomplete="name" placeholder="請輸入姓名" required>
+          <button type="submit">儲存</button>
+        </form>
+        <p class="muted" id="profileStatus">請先輸入姓名。</p>
+      </section>
+
+      <section class="panel quiz-panel" aria-live="polite">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" id="questionLabel">目前題目</p>
+            <h2 id="questionTitle">讀取中...</h2>
+          </div>
+          <button class="ghost-button" id="reloadButton" type="button">重新讀取題目</button>
+        </div>
+
+        <div class="notice hidden" id="noticeBox"></div>
+        <div class="question-text" id="questionText"></div>
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <button class="primary-action" id="submitAnswerButton" type="button" disabled>送出答案</button>
+
+        <div class="status-box" id="answerStatus">
+          請先確認姓名並等待題目載入。
+        </div>
+
+        <button class="danger-button" id="clearAnswersButton" type="button">清除本機作答紀錄</button>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
