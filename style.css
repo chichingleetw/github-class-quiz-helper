@@ -128,6 +128,21 @@ th {
   padding: 1rem;
 }
 
+.ui-preview {
+  margin: 1rem 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.ui-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 3;
+  object-fit: cover;
+}
+
 .panel h2 {
   margin: 0 0 0.9rem;
   font-size: 1.2rem;
