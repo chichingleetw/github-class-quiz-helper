@@ -17,24 +17,14 @@
       </header>
 
       <section class="panel">
-        <h2>產生學生網址與 QR code</h2>
-        <form id="teacherForm" class="stack-form">
-          <label for="sheetUrlInput">Google Sheet CSV URL</label>
-          <input id="sheetUrlInput" name="sheetUrl" type="url" placeholder="可貼 Google Sheet 編輯/分享網址，或發布到網路後的 CSV URL" required>
-
-          <label for="classIdInput">課程代號</label>
-          <input id="classIdInput" name="classId" type="text" placeholder="例如 bio101，可留空">
-
-          <button type="submit">產生學生網址與 QR code</button>
-        </form>
-
-        <div class="generated-area hidden" id="generatedArea">
-          <label for="studentUrlOutput">學生網址</label>
-          <textarea id="studentUrlOutput" rows="4" readonly></textarea>
-          <button class="ghost-button" id="copyUrlButton" type="button">複製網址</button>
-          <div class="qr-frame" id="qrcode"></div>
-          <p class="muted" id="copyStatus"></p>
-        </div>
+        <h2>老師操作流程</h2>
+        <ol class="steps">
+          <li>在 Google Sheet 填入題目與選項，將要開放的題目「開放作答」設為 T。</li>
+          <li>學生作答期間，「公布答案」設為 F，「正確答案」建議先留空。</li>
+          <li>請學生用手機掃描 QR code 進入學生頁作答。</li>
+          <li>公布答案時填入「正確答案」，並將「公布答案」改為 T。</li>
+          <li>請學生按「重新讀取題目」或重新整理頁面查看結果。</li>
+        </ol>
       </section>
 
       <section class="panel">
@@ -88,14 +78,24 @@
       </section>
 
       <section class="panel">
-        <h2>老師操作流程</h2>
-        <ol class="steps">
-          <li>在 Google Sheet 填入題目與選項，將要開放的題目「開放作答」設為 T。</li>
-          <li>學生作答期間，「公布答案」設為 F，「正確答案」建議先留空。</li>
-          <li>請學生用手機掃描 QR code 進入學生頁作答。</li>
-          <li>公布答案時填入「正確答案」，並將「公布答案」改為 T。</li>
-          <li>請學生按「重新讀取題目」或重新整理頁面查看結果。</li>
-        </ol>
+        <h2>產生學生網址與 QR code</h2>
+        <form id="teacherForm" class="stack-form">
+          <label for="sheetUrlInput">Google Sheet CSV URL</label>
+          <input id="sheetUrlInput" name="sheetUrl" type="url" placeholder="可貼 Google Sheet 編輯/分享網址，或發布到網路後的 CSV URL" required>
+
+          <label for="classIdInput">課程代號</label>
+          <input id="classIdInput" name="classId" type="text" placeholder="例如 bio101，可留空">
+
+          <button type="submit">產生學生網址與 QR code</button>
+        </form>
+
+        <div class="generated-area hidden" id="generatedArea">
+          <label for="studentUrlOutput">學生網址</label>
+          <textarea id="studentUrlOutput" rows="4" readonly></textarea>
+          <button class="ghost-button" id="copyUrlButton" type="button">複製網址</button>
+          <div class="qr-frame" id="qrcode"></div>
+          <p class="muted" id="copyStatus"></p>
+        </div>
       </section>
     </main>
 
